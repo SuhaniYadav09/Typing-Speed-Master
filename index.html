@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed Typing Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .title {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: bold;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .game-modes {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            padding: 15px 30px;
+            border: 3px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .mode-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102,126,234,0.3);
+        }
+
+        .settings {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .time-setting {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .time-setting label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .time-setting select {
+            padding: 8px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1em;
+            outline: none;
+        }
+
+        .time-setting select:focus {
+            border-color: #667eea;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: #f8f9fa;
+            padding: 15px 25px;
+            border-radius: 15px;
+            margin: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .text-display {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            font-size: 1.3em;
+            line-height: 1.8;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .text-content {
+            max-width: 100%;
+        }
+
+        .char {
+            position: relative;
+        }
+
+        .char.correct {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .char.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .char.current {
+            background-color: #667eea;
+            color: white;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.5; }
+        }
+
+        .word-display {
+            font-size: 3em;
+            font-weight: bold;
+            color: #333;
+            margin: 20px 0;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .word-display.correct {
+            color: #28a745;
+        }
+
+        .word-display.incorrect {
+            color: #dc3545;
+        }
+
+        .input-area {
+            margin: 30px 0;
+        }
+
+        #typeInput {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.2em;
+            border: 3px solid #e9ecef;
+            border-radius: 15px;
+            outline: none;
+            transition: border-color 0.3s ease;
+            text-align: center;
+        }
+
+        #typeInput:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .start-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102,126,234,0.3);
+        }
+
+        .start-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .reset-btn {
+            background: #6c757d;
+            color: white;
+        }
+
+        .reset-btn:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .new-text-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .new-text-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .game-over {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .game-over h2 {
+            margin-bottom: 15px;
+            font-size: 2em;
+        }
+
+        .final-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .final-stat {
+            text-align: center;
+            margin: 10px;
+        }
+
+        .final-stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+
+        .final-stat-label {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .word-mode-hidden {
+            display: none;
+        }
+
+        .word-mode-visible {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 20px;
+            }
+            
+            .title {
+                font-size: 2em;
+            }
+            
+            .game-modes {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .mode-btn {
+                width: 200px;
+            }
+            
+            .stats {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 200px;
+            }
+
+            .word-display {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="title">⚡ Speed Typing Game</h1>
+        
+        <div class="game-modes">
+            <button class="mode-btn active" id="textMode">📝 Text Mode</button>
+            <button class="mode-btn" id="wordMode">🔤 Word Mode</button>
+        </div>
+
+        <div class="settings">
+            <div class="time-setting">
+                <label for="timeLimit">Time Limit:</label>
+                <select id="timeLimit">
+                    <option value="15">15 seconds</option>
+                    <option value="30">30 seconds</option>
+                    <option value="60" selected>1 minute</option>
+                    <option value="120">2 minutes</option>
+                    <option value="300">5 minutes</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="wpm">0</div>
+                <div class="stat-label">WPM</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="accuracy">100%</div>
+                <div class="stat-label">Accuracy</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="timer">60</div>
+                <div class="stat-label">Time Left</div>
+            </div>
+            <div class="stat-item word-mode-hidden" id="wordsTypedStat">
+                <div class="stat-value" id="wordsTyped">0</div>
+                <div class="stat-label">Words Typed</div>
+            </div>
+        </div>
+
+        <div class="text-display" id="textDisplay">
+            <div class="text-content" id="textContent">Click "Start Game" to begin!</div>
+        </div>
+
+        <div class="word-display word-mode-hidden" id="wordDisplay"></div>
+
+        <div class="input-area">
+            <input type="text" id="typeInput" placeholder="Start typing here..." disabled>
+        </div>
+
+        <div class="buttons">
+            <button class="start-btn" id="startBtn">Start Game</button>
+            <button class="reset-btn" id="resetBtn">Reset</button>
+            <button class="new-text-btn" id="newTextBtn">New Text</button>
+        </div>
+
+        <div class="game-over" id="gameOver">
+            <h2>🎉 Game Complete!</h2>
+            <p>Great job! Here are your final results:</p>
+            <div class="final-stats">
+                <div class="final-stat">
+                    <div class="final-stat-value" id="finalWPM">0</div>
+                    <div class="final-stat-label">Words Per Minute</div>
+                </div>
+                <div class="final-stat">
+                    <div class="final-stat-value" id="finalAccuracy">0%</div>
+                    <div class="final-stat-label">Accuracy</div>
+                </div>
+                <div class="final-stat">
+                    <div class="final-stat-value" id="finalChars">0</div>
+                    <div class="final-stat-label">Characters/Words Typed</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class SpeedTypingGame {
+            constructor() {
+                this.texts = [
+                    "The quick brown fox jumps over the lazy dog. This sentence contains every letter of the alphabet and is perfect for typing practice.",
+                    "In a hole in the ground there lived a hobbit. Not a nasty, dirty, wet hole filled with the ends of worms and an oozy smell.",
+                    "To be or not to be, that is the question. Whether 'tis nobler in the mind to suffer the slings and arrows of outrageous fortune.",
+                    "It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness.",
+                    "All happy families are alike; each unhappy family is unhappy in its own way. Everything was in confusion in the house.",
+                    "Space: the final frontier. These are the voyages of the starship Enterprise, to explore strange new worlds and civilizations.",
+                    "In the beginning was the Word, and the Word was with God, and the Word was God. All things were made through him.",
+                    "Call me Ishmael. Some years ago, never mind how long precisely, having little or no money in my purse and nothing particular."
+                ];
+
+                this.wordList = [
+                    "about", "above", "abuse", "actor", "acute", "admit", "adopt", "adult", "after", "again",
+                    "agent", "agree", "ahead", "alarm", "album", "alert", "alike", "alive", "allow", "alone",
+                    "along", "alter", "among", "anger", "angle", "angry", "apart", "apple", "apply", "arena",
+                    "argue", "arise", "array", "aside", "asset", "avoid", "awake", "award", "aware", "badly",
+                    "baker", "bases", "basic", "beach", "began", "begin", "being", "below", "bench", "billy",
+                    "birth", "black", "blame", "blind", "block", "blood", "board", "boost", "booth", "bound",
+                    "brain", "brand", "brass", "brave", "bread", "break", "breed", "brief", "bring", "broad",
+                    "broke", "brown", "build", "burst", "buyer", "cable", "calif", "carry", "catch", "cause",
+                    "chain", "chair", "chaos", "charm", "chart", "chase", "cheap", "check", "chest", "chief",
+                    "child", "china", "chose", "civil", "claim", "class", "clean", "clear", "click", "climb",
+                    "clock", "close", "cloud", "coach", "coast", "could", "count", "court", "cover", "craft"
+                ];
+                
+                this.currentText = '';
+                this.currentWords = [];
+                this.currentWordIndex = 0;
+                this.currentIndex = 0;
+                this.startTime = 0;
+                this.timeLeft = 60;
+                this.timer = null;
+                this.gameActive = false;
+                this.totalTyped = 0;
+                this.correctChars = 0;
+                this.correctWords = 0;
+                this.gameMode = 'text'; // 'text' or 'word'
+                
+                this.initializeElements();
+                this.setupEventListeners();
+                this.loadNewText();
+            }
+            
+            initializeElements() {
+                this.textDisplay = document.getElementById('textDisplay');
+                this.textContent = document.getElementById('textContent');
+                this.wordDisplay = document.getElementById('wordDisplay');
+                this.typeInput = document.getElementById('typeInput');
+                this.startBtn = document.getElementById('startBtn');
+                this.resetBtn = document.getElementById('resetBtn');
+                this.newTextBtn = document.getElementById('newTextBtn');
+                this.textModeBtn = document.getElementById('textMode');
+                this.wordModeBtn = document.getElementById('wordMode');
+                this.timeLimitSelect = document.getElementById('timeLimit');
+                this.wpmDisplay = document.getElementById('wpm');
+                this.accuracyDisplay = document.getElementById('accuracy');
+                this.timerDisplay = document.getElementById('timer');
+                this.wordsTypedDisplay = document.getElementById('wordsTyped');
+                this.wordsTypedStat = document.getElementById('wordsTypedStat');
+                this.gameOverDiv = document.getElementById('gameOver');
+                this.finalWPM = document.getElementById('finalWPM');
+                this.finalAccuracy = document.getElementById('finalAccuracy');
+                this.finalChars = document.getElementById('finalChars');
+            }
+            
+            setupEventListeners() {
+                this.startBtn.addEventListener('click', () => this.startGame());
+                this.resetBtn.addEventListener('click', () => this.resetGame());
+                this.newTextBtn.addEventListener('click', () => this.loadNewText());
+                this.textModeBtn.addEventListener('click', () => this.setGameMode('text'));
+                this.wordModeBtn.addEventListener('click', () => this.setGameMode('word'));
+                this.timeLimitSelect.addEventListener('change', () => this.updateTimeLimit());
+                this.typeInput.addEventListener('input', (e) => this.handleInput(e));
+                this.typeInput.addEventListener('keydown', (e) => this.handleKeyDown(e));
+                this.typeInput.addEventListener('paste', (e) => e.preventDefault());
+            }
+
+            setGameMode(mode) {
+                this.gameMode = mode;
+                this.textModeBtn.classList.toggle('active', mode === 'text');
+                this.wordModeBtn.classList.toggle('active', mode === 'word');
+                
+                if (mode === 'text') {
+                    this.textDisplay.style.display = 'flex';
+                    this.wordDisplay.style.display = 'none';
+                    this.wordsTypedStat.classList.add('word-mode-hidden');
+                    this.typeInput.placeholder = 'Start typing here...';
+                } else {
+                    this.textDisplay.style.display = 'none';
+                    this.wordDisplay.style.display = 'flex';
+                    this.wordsTypedStat.classList.remove('word-mode-hidden');
+                    this.typeInput.placeholder = 'Type the word you see...';
+                }
+                
+                this.resetGame();
+                this.loadNewText();
+            }
+
+            updateTimeLimit() {
+                const newTime = parseInt(this.timeLimitSelect.value);
+                this.timeLeft = newTime;
+                this.timerDisplay.textContent = newTime;
+            }
+            
+            loadNewText() {
+                if (this.gameMode === 'text') {
+                    const randomIndex = Math.floor(Math.random() * this.texts.length);
+                    this.currentText = this.texts[randomIndex];
+                    this.displayText();
+                } else {
+                    this.generateRandomWords();
+                    this.displayCurrentWord();
+                }
+                this.resetGame();
+            }
+
+            generateRandomWords() {
+                this.currentWords = [];
+                for (let i = 0; i < 100; i++) { // Generate 100 random words
+                    const randomIndex = Math.floor(Math.random() * this.wordList.length);
+                    this.currentWords.push(this.wordList[randomIndex]);
+                }
+                this.currentWordIndex = 0;
+            }
+
+            displayCurrentWord() {
+                if (this.currentWordIndex < this.currentWords.length) {
+                    this.wordDisplay.textContent = this.currentWords[this.currentWordIndex];
+                    this.wordDisplay.className = 'word-display';
+                } else {
+                    this.endGame();
+                }
+            }
+            
+            displayText() {
+                this.textContent.innerHTML = this.currentText
+                    .split('')
+                    .map((char, index) => `<span class="char" data-index="${index}">${char}</span>`)
+                    .join('');
+            }
+            
+            startGame() {
+                if (this.gameActive) return;
+                
+                this.gameActive = true;
+                this.startTime = Date.now();
+                this.timeLeft = parseInt(this.timeLimitSelect.value);
+                this.currentIndex = 0;
+                this.currentWordIndex = 0;
+                this.totalTyped = 0;
+                this.correctChars = 0;
+                this.correctWords = 0;
+                
+                this.typeInput.disabled = false;
+                this.typeInput.focus();
+                this.typeInput.value = '';
+                
+                this.startBtn.textContent = 'Game Active';
+                this.startBtn.disabled = true;
+                this.gameOverDiv.style.display = 'none';
+                
+                if (this.gameMode === 'text') {
+                    this.updateHighlight();
+                } else {
+                    this.displayCurrentWord();
+                }
+                
+                this.startTimer();
+            }
+            
+            startTimer() {
+                this.timer = setInterval(() => {
+                    this.timeLeft--;
+                    this.timerDisplay.textContent = this.timeLeft;
+                    
+                    if (this.timeLeft <= 0) {
+                        this.endGame();
+                    }
+                }, 1000);
+            }
+
+            handleKeyDown(e) {
+                if (this.gameMode === 'word' && e.key === 'Enter') {
+                    this.checkWord();
+                }
+            }
+            
+            handleInput(e) {
+                if (!this.gameActive) return;
+                
+                if (this.gameMode === 'text') {
+                    this.handleTextInput(e);
+                } else {
+                    this.handleWordInput(e);
+                }
+            }
+
+            handleTextInput(e) {
+                const inputValue = e.target.value;
+                const inputLength = inputValue.length;
+                
+                // Prevent typing beyond text length
+                if (inputLength > this.currentText.length) {
+                    e.target.value = inputValue.substring(0, this.currentText.length);
+                    return;
+                }
+                
+                this.currentIndex = inputLength;
+                this.totalTyped = inputLength;
+                
+                // Update character highlighting
+                this.updateCharacterStates(inputValue);
+                this.updateHighlight();
+                this.updateStats();
+                
+                // Check if text is completed
+                if (inputLength === this.currentText.length) {
+                    this.endGame();
+                }
+            }
+
+            handleWordInput(e) {
+                // Auto-check word when space is pressed or when word is complete
+                const inputValue = e.target.value.trim();
+                const currentWord = this.currentWords[this.currentWordIndex];
+                
+                if (inputValue === currentWord) {
+                    this.wordDisplay.className = 'word-display correct';
+                } else if (inputValue.length > 0) {
+                    this.wordDisplay.className = 'word-display incorrect';
+                } else {
+                    this.wordDisplay.className = 'word-display';
+                }
+            }
+
+            checkWord() {
+                const inputValue = this.typeInput.value.trim();
+                const currentWord = this.currentWords[this.currentWordIndex];
+                
+                this.totalTyped++;
+                
+                if (inputValue === currentWord) {
+                    this.correctWords++;
+                    this.correctChars += currentWord.length;
+                    this.wordDisplay.className = 'word-display correct';
+                } else {
+                    this.wordDisplay.className = 'word-display incorrect';
+                }
+                
+                this.currentWordIndex++;
+                this.typeInput.value = '';
+                
+                setTimeout(() => {
+                    this.displayCurrentWord();
+                    this.updateStats();
+                }, 500);
+            }
+            
+            updateCharacterStates(inputValue) {
+                const chars = this.textContent.querySelectorAll('.char');
+                this.correctChars = 0;
+                
+                chars.forEach((char, index) => {
+                    char.className = 'char';
+                    
+                    if (index < inputValue.length) {
+                        if (inputValue[index] === this.currentText[index]) {
+                            char.classList.add('correct');
+                            this.correctChars++;
+                        } else {
+                            char.classList.add('incorrect');
+                        }
+                    }
+                });
+            }
+            
+            updateHighlight() {
+                const chars = this.textContent.querySelectorAll('.char');
+                chars.forEach((char, index) => {
+                    if (index === this.currentIndex) {
+                        char.classList.add('current');
+                    } else {
+                        char.classList.remove('current');
+                    }
+                });
+            }
+            
+            updateStats() {
+                // Calculate WPM
+                const timeElapsed = (Date.now() - this.startTime) / 1000 / 60; // in minutes
+                let wpm = 0;
+                
+                if (this.gameMode === 'text') {
+                    const wordsTyped = this.correctChars / 5; // 5 characters = 1 word
+                    wpm = timeElapsed > 0 ? Math.round(wordsTyped / timeElapsed) : 0;
+                } else {
+                    wpm = timeElapsed > 0 ? Math.round(this.correctWords / timeElapsed) : 0;
+                    this.wordsTypedDisplay.textContent = this.correctWords;
+                }
+                
+                // Calculate accuracy
+                const accuracy = this.totalTyped > 0 ? Math.round((this.correctChars / this.totalTyped) * 100) : 100;
+                
+                this.wpmDisplay.textContent = wpm;
+                this.accuracyDisplay.textContent = accuracy + '%';
+            }
+            
+            endGame() {
+                this.gameActive = false;
+                clearInterval(this.timer);
+                
+                this.typeInput.disabled = true;
+                this.startBtn.textContent = 'Start Game';
+                this.startBtn.disabled = false;
+                
+                // Calculate final stats
+                const timeElapsed = (Date.now() - this.startTime) / 1000 / 60;
+                let finalWPM = 0;
+                let finalTyped = 0;
+                
+                if (this.gameMode === 'text') {
+                    finalWPM = Math.round((this.correctChars / 5) / timeElapsed);
+                    finalTyped = this.totalTyped;
+                    const finalAccuracy = this.totalTyped > 0 ? Math.round((this.correctChars / this.totalTyped) * 100) : 100;
+                    this.finalAccuracy.textContent = finalAccuracy + '%';
+                } else {
+                    finalWPM = Math.round(this.correctWords / timeElapsed);
+                    finalTyped = this.correctWords;
+                    const finalAccuracy = this.totalTyped > 0 ? Math.round((this.correctWords / this.totalTyped) * 100) : 100;
+                    this.finalAccuracy.textContent = finalAccuracy + '%';
+                }
+                
+                // Display final results
+                this.finalWPM.textContent = finalWPM;
+                this.finalChars.textContent = finalTyped;
+                
+                this.gameOverDiv.style.display = 'block';
+            }
+            
+            resetGame() {
+                this.gameActive = false;
+                clearInterval(this.timer);
+                
+                this.currentIndex = 0;
+                this.currentWordIndex = 0;
+                this.timeLeft = parseInt(this.timeLimitSelect.value);
+                this.totalTyped = 0;
+                this.correctChars = 0;
+                this.correctWords = 0;
+                
+                this.typeInput.value = '';
+                this.typeInput.disabled = true;
+                this.startBtn.textContent = 'Start Game';
+                this.startBtn.disabled = false;
+                
+                this.wpmDisplay.textContent = '0';
+                this.accuracyDisplay.textContent = '100%';
+                this.timerDisplay.textContent = this.timeLeft;
+                this.wordsTypedDisplay.textContent = '0';
+                
+                this.gameOverDiv.style.display = 'none';
+                
+                // Reset displays
+                if (this.gameMode === 'text') {
+                    const chars = this.textContent.querySelectorAll('.char');
+                    chars.forEach(char => {
+                        char.className = 'char';
+                    });
+                    this.updateHighlight();
+                } else {
+                    this.wordDisplay.className = 'word-display';
+                    if (this.currentWords.length > 0) {
+                        this.displayCurrentWord();
+                    }
+                }
+            }
+        }
+        
+        // Initialize the game when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new SpeedTypingGame();
+        });
+    </script>
+</body>
+</html>
